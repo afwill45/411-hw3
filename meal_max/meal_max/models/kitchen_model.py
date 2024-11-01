@@ -21,6 +21,15 @@ class Meal:
     difficulty: str
 
     def __post_init__(self):
+        """
+        
+        Ensures that value is positive and difficulty is LOW, MED, or HIGH when initializing 	
+
+        Raises:
+            ValueError: If self.price < 0
+            ValueError: If self.difficulty is not LOW, MED, or HIGH
+
+        """
         if self.price < 0:
             raise ValueError("Price must be a positive value.")
         if self.difficulty not in ['LOW', 'MED', 'HIGH']:
@@ -28,6 +37,18 @@ class Meal:
 
 
 def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
+    """
+    
+    Args:
+        meal (str): The name of the combatant (meal)
+        cuisine (str): The cuisine type of the combatant
+        price (float): The price of the combatant
+        diffficulty (str): The preparation difficulty (ranges between HIGH, MED, and LOW)
+
+    Returns:
+        None
+
+    """
     if not isinstance(price, (int, float)) or price <= 0:
         raise ValueError(f"Invalid price: {price}. Price must be a positive number.")
     if difficulty not in ['LOW', 'MED', 'HIGH']:
