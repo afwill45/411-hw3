@@ -1,4 +1,3 @@
-#Just slapping in the first few lines of the playlist version. Not 100% sure what they do yet.
 #!/bin/bash
 
 # Define the base URL for the Flask API
@@ -25,8 +24,8 @@ done
 # Function to check the health of the service
 check_health() {
   echo "Checking health status..."
-  curl -s -X GET "$BASE_URL/health" | grep -q '"status": "healthy"'
-  if [ $? -eq 0 ]; then
+  response=$(curl -s -X GET "$BASE_URL/health")
+  if echo "$response" | grep -q '"status": "healthy"'; then
     echo "Service is healthy."
   else
     echo "Health check failed."
@@ -37,8 +36,8 @@ check_health() {
 # Function to check the database connection
 check_db() {
   echo "Checking database connection..."
-  curl -s -X GET "$BASE_URL/db-check" | grep -q '"database_status": "healthy"'
-  if [ $? -eq 0 ]; then
+  response=$(curl -s -X GET "$BASE_URL/db-check")
+  if echo "$response" | grep -q '"database_status": "healthy"'; then
     echo "Database connection is healthy."
   else
     echo "Database check failed."
@@ -53,21 +52,27 @@ check_db() {
 ##########################################################
 
 clear_meals() {
-  echo "Clearing all meals"
-  curl -s -X DELETE "$BASE_URL/clear-catalog" | grep -q '"status": "success"'
+  echo "Clearing all meals..."
+  response=$(curl -s -X DELETE "$BASE_URL/clear-meals")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "All meals cleared successfully."
+  else
+    echo "Failed to clear meals."
+    exit 1
+  fi
 }
 
-create_meal(){
-    meal=$1
-    cuisine=$2 
-    price=$3
-    difficulty=$4
-    
-    echo "Adding meal ($meal) to the database..."
-  curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":\"$difficulty\"}" | grep -q '"status": "success"'
+create_meal() {
+  meal=$1
+  cuisine=$2
+  price=$3
+  difficulty=$4
 
-  if [ $? -eq 0 ]; then
+  echo "Adding meal ($meal) to the database..."
+  response=$(curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
+    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":\"$difficulty\"}")
+
+  if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal added successfully."
   else
     echo "Failed to add meal."
@@ -75,17 +80,17 @@ create_meal(){
   fi
 }
 
-delete_meal(){
-    meal_id=$1
+delete_meal() {
+  meal_id=$1
 
-    echo "Deleting meal by ID ($meal_id)..."
-    response=$(curl -s -X DELETE "$BASE_URL/delete-meal/$meal_id")
-    if echo "$response" | grep -q '"status": "success"'; then
+  echo "Deleting meal by ID ($meal_id)..."
+  response=$(curl -s -X DELETE "$BASE_URL/delete-meal/$meal_id")
+  if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal deleted successfully by ID ($meal_id)."
-    else
+  else
     echo "Failed to delete meal by ID ($meal_id)."
     exit 1
-    fi
+  fi
 }
 
 get_leaderboard() {
@@ -137,51 +142,134 @@ get_meal_by_name() {
   fi
 }
 
-#this doesn't work at all yet
-update_meal_stats() {
-    meal_id=$1
-    result=$2
+##########################################################
+#
+# Battle Management
+#
+##########################################################
 
-    echo "Updating meal battle statistics..."
-    response=$(curl -s -X POST "$BASE_URL/update-meal-stats")
-    if [ $? -eq 0 ]; then
-        echo "Meal stats updated successfully."
-    else
-        echo "Failed to update meal stats."
-        exit 1
+# Function to clear combatants
+clear_combatants() {
+  echo "Clearing combatants..."
+  response=$(curl -s -X DELETE "$BASE_URL/clear-combatants")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatants cleared successfully."
+  else
+    echo "Failed to clear combatants."
+    exit 1
   fi
-
 }
 
+# Function to prepare a combatant
+prep_combatant() {
+  meal_id=$1
 
+  echo "Preparing combatant with Meal ID ($meal_id)..."
+  response=$(curl -s -X POST "$BASE_URL/prep-combatant/$meal_id")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatant prepared successfully."
+  else
+    echo "Failed to prepare combatant."
+    exit 1
+  fi
+}
 
+# Function to get current combatants
+get_combatants() {
+  echo "Getting current combatants..."
+  response=$(curl -s -X GET "$BASE_URL/get-combatants")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatants retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Combatants JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to get combatants."
+    exit 1
+  fi
+}
 
+# Function to start a battle
+start_battle() {
+  echo "Starting battle..."
+  response=$(curl -s -X POST "$BASE_URL/start-battle")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Battle completed successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Battle Result JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to start battle."
+    exit 1
+  fi
+}
+
+##########################################################
+#
+# Run Smoke Tests
+#
+##########################################################
 
 # Health checks
 check_health
 check_db
 
-# Clear the catalog
+# Clear meals and combatants
 clear_meals
+clear_combatants
 
 # Create meals
-create_meal "Spaghetti" "Italian" 15.99 "MED"
-create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"
-create_meal "Mc Nuggets" "American" 0.01 "LOW"
-create_meal "Jello Salad" "American" 1.00 "MED"
-create_meal "Burrito" "Mexican" 10000.00 "MED"
+create_meal "Spaghetti" "Italian" 15.99 "MED"        # Meal ID 1
+create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"    # Meal ID 2
+create_meal "Mc Nuggets" "American" 0.01 "LOW"       # Meal ID 3
+create_meal "Jello Salad" "American" 1.00 "MED"      # Meal ID 4
+create_meal "Burrito" "Mexican" 10000.00 "MED"       # Meal ID 5
 
+# Delete a meal
 delete_meal 1
+
+# Get leaderboard
 get_leaderboard
+
+# Get meal by ID and name
 get_meal_by_id 2
 get_meal_by_name "Jello Salad"
 
+# Clear meals again
 clear_meals
 
-create_meal "Burrito" "Mexican" 10000.00 "MED"
-create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"
-create_meal "Mc Nuggets" "American" 0.01 "LOW"
-create_meal "Jello Salad" "American" 1.00 "MED"
-create_meal "Spaghetti" "Italian" 15.99 "MED"
+# Create meals again
+create_meal "Burrito" "Mexican" 10000.00 "MED"       # Meal ID 1
+create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"    # Meal ID 2
+create_meal "Mc Nuggets" "American" 0.01 "LOW"       # Meal ID 3
+create_meal "Jello Salad" "American" 1.00 "MED"      # Meal ID 4
+create_meal "Spaghetti" "Italian" 15.99 "MED"        # Meal ID 5
 
-update_meal_stats 1 "win"
+# Prepare combatants
+prep_combatant 1  # Burrito
+prep_combatant 2  # Wagyu Steak
+
+# Get combatants
+get_combatants
+
+# Start battle
+start_battle
+
+# Get leaderboard to see updated stats
+get_leaderboard
+
+# Prepare next combatant
+prep_combatant 3  # Mc Nuggets
+
+# Get combatants
+get_combatants
+
+# Start another battle
+start_battle
+
+# Get final leaderboard
+get_leaderboard
+
+echo "All tests passed successfully!"
