@@ -48,6 +48,8 @@ class Meal:
 def create_meal(meal: str, cuisine: str, price: float, difficulty: str) -> None:
     """
     
+    Creates an instance of a meal and stores it in the database
+
     Args:
         meal (str): The name of the combatant (meal)
         cuisine (str): The cuisine type of the combatant
@@ -120,6 +122,8 @@ def clear_meals() -> None:
 def delete_meal(meal_id: int) -> None:
     """
 
+    Deletes a meal from the database by its ID 
+
     Args:
         meal_id (int):
 
@@ -156,6 +160,8 @@ def delete_meal(meal_id: int) -> None:
 
 def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
     """
+
+    Creates a leaderbord organized by either number of wins or overall win percentage
 
     Args:
        sort_by (str): The criteria used to rank the leaderboard. Can be either "wins" for number of wins or "win_pct" for the win ratio.
@@ -210,6 +216,8 @@ def get_leaderboard(sort_by: str="wins") -> dict[str, Any]:
 
 def get_meal_by_id(meal_id: int) -> Meal:
     """
+
+    Gives the information of a meal corresponding to an ID
     
     Args:
         meal_id (int): ID of the meal you are searching for
@@ -245,6 +253,8 @@ def get_meal_by_id(meal_id: int) -> Meal:
 
 def get_meal_by_name(meal_name: str) -> Meal:
     """
+
+    Gives the information of a meal corresponding to its name
     
     Args:
         meal_name (str): The name of the meal you are searching for
@@ -280,6 +290,8 @@ def get_meal_by_name(meal_name: str) -> Meal:
 
 def update_meal_stats(meal_id: int, result: str) -> None:
     """
+
+    Updates a meal's win/loss match statistics
     
     Args:
         meal_id (int): ID of the meal to be updated
