@@ -1,0 +1,77 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pytest cache
+.pytest_cache/
+
+# mypy cache
+.mypy_cache/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+.nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Environment variable files
+*.env
+*.env.*
+
+# macOS
+.DS_Store
+
+# VS Code files
+.vscode/
+
+# IDE and editor files
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Local virtual environments
+.pipenv
+*.venv
