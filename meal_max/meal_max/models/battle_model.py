@@ -11,14 +11,19 @@ configure_logger(logger)
 
 
 class BattleModel:
-    """A model to conduct battles between two `Meal` instances and determine a winner based on calculated scores."""
+    """
+    A model to conduct battles between two `Meal` instances and determine a winner based on calculated scores.
+    """
 
     def __init__(self):
-        """Initializes a `BattleModel` instance with an empty list of combatants."""
+        """
+        Initializes a `BattleModel` instance with an empty list of combatants.
+        """
         self.combatants: List[Meal] = []
 
     def battle(self) -> str:
-        """Conducts a battle between two prepared `Meal` instances.
+        """
+        Conducts a battle between two prepared `Meal` instances.
 
         Returns:
             str: The name of the winning meal.
@@ -66,12 +71,15 @@ class BattleModel:
         return winner.meal
 
     def clear_combatants(self):
-        """Clears the list of combatants, preparing for a new battle."""
+        """
+        Clears the list of combatants, preparing for a new battle.
+        """
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
 
     def get_battle_score(self, combatant: Meal) -> float:
-        """Calculates the battle score of a combatant.
+        """
+        Calculates the battle score of a combatant.
 
         Args:
             combatant (Meal): The meal combatant whose score is to be calculated.
@@ -90,7 +98,8 @@ class BattleModel:
         return score
 
     def get_combatants(self) -> List[Meal]:
-        """Retrieves the current list of combatants.
+        """
+        Retrieves the current list of combatants.
 
         Returns:
             List[Meal]: A list of `Meal` instances prepared for battle.
@@ -99,7 +108,8 @@ class BattleModel:
         return self.combatants
 
     def prep_combatant(self, combatant_data: Meal):
-        """Adds a `Meal` instance to the list of combatants for an upcoming battle.
+        """
+        Adds a `Meal` instance to the list of combatants for an upcoming battle.
 
         Args:
             combatant_data (Meal): The meal data to be prepared as a combatant.

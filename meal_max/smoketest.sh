@@ -48,7 +48,7 @@ check_db() {
 
 ##########################################################
 #
-# Meal Management
+# Meal & Leaderboard Management
 #
 ##########################################################
 
@@ -137,6 +137,51 @@ get_meal_by_name() {
   fi
 }
 
+#this doesn't work at all yet
+update_meal_stats() {
+    meal_id=$1
+    result=$2
+
+    echo "Updating meal battle statistics..."
+    response=$(curl -s -X POST "$BASE_URL/update-meal-stats")
+    if [ $? -eq 0 ]; then
+        echo "Meal stats updated successfully."
+    else
+        echo "Failed to update meal stats."
+        exit 1
+  fi
+
+}
 
 
 
+
+
+# Health checks
+check_health
+check_db
+
+# Clear the catalog
+clear_meals
+
+# Create meals
+create_meal "Spaghetti" "Italian" 15.99 "MED"
+create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"
+create_meal "Mc Nuggets" "American" 0.01 "LOW"
+create_meal "Jello Salad" "American" 1.00 "MED"
+create_meal "Burrito" "Mexican" 10000.00 "MED"
+
+delete_meal 1
+get_leaderboard
+get_meal_by_id 2
+get_meal_by_name "Jello Salad"
+
+clear_meals
+
+create_meal "Burrito" "Mexican" 10000.00 "MED"
+create_meal "Wagyu Steak" "Japanese" 57.99 "HIGH"
+create_meal "Mc Nuggets" "American" 0.01 "LOW"
+create_meal "Jello Salad" "American" 1.00 "MED"
+create_meal "Spaghetti" "Italian" 15.99 "MED"
+
+update_meal_stats 1 "win"
