@@ -15,6 +15,20 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
+# Function to URL-encode strings
+urlencode() {
+    local length="${#1}"
+    local encoded=""
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case "$c" in
+            [a-zA-Z0-9.~_-]) encoded+="$c" ;;
+            *) encoded+=$(printf '%%%02X' "'$c") ;;
+        esac
+    done
+    echo "$encoded"
+}
+
 ###############################################
 #
 # Health checks
@@ -58,7 +72,7 @@ clear_meals() {
         echo "All meals cleared successfully."
     else
         echo "Failed to clear meals."
-    exit 1
+        exit 1
     fi
 }
 
@@ -69,8 +83,16 @@ create_meal() {
   difficulty=$4
 
   echo "Adding meal ($meal) to the database..."
+
+  json_payload=$(jq -n \
+    --arg meal "$meal" \
+    --arg cuisine "$cuisine" \
+    --arg price "$price" \
+    --arg difficulty "$difficulty" \
+    '{meal: $meal, cuisine: $cuisine, price: ($price|tonumber), difficulty: $difficulty}')
+
   response=$(curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":\"$difficulty\"}")
+    -d "$json_payload")
 
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal added successfully."
@@ -97,11 +119,11 @@ get_leaderboard() {
     echo "Getting all meals in the leaderboard..."
     response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-leaderboard")
     if echo "$response" | grep -q '"status": "success"'; then
-        echo "Leaderboardd retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-        echo "Meals JSON:"
-        echo "$response" | jq .
-    fi
+        echo "Leaderboard retrieved successfully."
+        if [ "$ECHO_JSON" = true ]; then
+            echo "Meals JSON:"
+            echo "$response" | jq .
+        fi
     else
         echo "Failed to get Leaderboard."
         exit 1
@@ -115,27 +137,28 @@ get_meal_by_id() {
     response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-id/$meal_id")
     if echo "$response" | grep -q '"status": "success"'; then
         echo "Meal retrieved successfully by ID ($meal_id)."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Meal JSON (ID $meal_id):"
-      echo "$response" | jq .
-    fi
+        if [ "$ECHO_JSON" = true ]; then
+            echo "Meal JSON (ID $meal_id):"
+            echo "$response" | jq .
+        fi
     else
         echo "Failed to get meal by ID ($meal_id)."
         exit 1
-  fi
+    fi
 }
 
 get_meal_by_name() {
     meal_name=$1
+    encoded_meal_name=$(urlencode "$meal_name")
 
     echo "Getting meal by name ($meal_name)..."
-    response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-name/$meal_name")
+    response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-name/$encoded_meal_name")
     if echo "$response" | grep -q '"status": "success"'; then
         echo "Meal retrieved successfully by name ($meal_name)."
-    if [ "$ECHO_JSON" = true ]; then
-        echo "Meal JSON (Name $meal_name):"
-        echo "$response" | jq .
-    fi
+        if [ "$ECHO_JSON" = true ]; then
+            echo "Meal JSON (Name $meal_name):"
+            echo "$response" | jq .
+        fi
     else
         echo "Failed to get meal by name ($meal_name)."
         exit 1
@@ -152,11 +175,11 @@ get_meal_by_name() {
 clear_combatants() {
   echo "Clearing combatants..."
   response=$(curl -s -X DELETE "$BASE_URL/clear-combatants")
-    if echo "$response" | grep -q '"status": "success"'; then
-        echo "Combatants cleared successfully."
-    else
-        echo "Failed to clear combatants."
-        exit 1
+  if echo "$response" | grep -q '"status": "success"'; then
+      echo "Combatants cleared successfully."
+  else
+      echo "Failed to clear combatants."
+      exit 1
   fi
 }
 
@@ -237,7 +260,6 @@ get_leaderboard
 get_meal_by_id 2
 get_meal_by_name "Jello Salad"
 get_meal_by_id 2
-
 
 # Clear meals again
 clear_meals
