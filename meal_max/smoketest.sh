@@ -2,7 +2,7 @@
 #!/bin/bash
 
 # Define the base URL for the Flask API
-BASE_URL="http://localhost:5000/api"
+BASE_URL="http://localhost:5001/api"
 
 # Flag to control whether to echo JSON output
 ECHO_JSON=false
@@ -81,63 +81,62 @@ delete_meal(){
     echo "Deleting meal by ID ($meal_id)..."
     response=$(curl -s -X DELETE "$BASE_URL/delete-meal/$meal_id")
     if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meal deleted successfully by ID ($meal_id)."
+        echo "Meal deleted successfully by ID ($meal_id)."
     else
-    echo "Failed to delete meal by ID ($meal_id)."
-    exit 1
+        echo "Failed to delete meal by ID ($meal_id)."
+        exit 1
     fi
 }
 
 get_leaderboard() {
-  echo "Getting all meals in the leaderboard..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-leaderboard")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "All meals retrieved successfully."
+    echo "Getting all meals in the leaderboard..."
+    response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-leaderboard")
+    if echo "$response" | grep -q '"status": "success"'; then
+        echo "Leaderboardd retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Meals JSON:"
-      echo "$response" | jq .
+        echo "Meals JSON:"
+        echo "$response" | jq .
     fi
-  else
-    echo "Failed to get meals."
-    exit 1
-  fi
+    else
+        echo "Failed to get Leaderboard."
+        exit 1
+    fi
 }
 
 get_meal_by_id() {
-  meal_id=$1
+    meal_id=$1
 
-  echo "Getting meal by ID ($meal_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-id/$meal_id")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meal retrieved successfully by ID ($meal_id)."
+    echo "Getting meal by ID ($meal_id)..."
+    response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-id/$meal_id")
+    if echo "$response" | grep -q '"status": "success"'; then
+        echo "Meal retrieved successfully by ID ($meal_id)."
     if [ "$ECHO_JSON" = true ]; then
       echo "Meal JSON (ID $meal_id):"
       echo "$response" | jq .
     fi
-  else
-    echo "Failed to get meal by ID ($meal_id)."
-    exit 1
+    else
+        echo "Failed to get meal by ID ($meal_id)."
+        exit 1
   fi
 }
 
 get_meal_by_name() {
-  meal_name=$1
+    meal_name=$1
 
-  echo "Getting meal by name ($meal_name)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-name/$meal_name")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meal retrieved successfully by name ($meal_name)."
+    echo "Getting meal by name ($meal_name)..."
+    response=$(curl -s -X GET "$BASE_URL/get-meal-from-database-by-name/$meal_name")
+    if echo "$response" | grep -q '"status": "success"'; then
+        echo "Meal retrieved successfully by name ($meal_name)."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Meal JSON (Name $meal_name):"
-      echo "$response" | jq .
+        echo "Meal JSON (Name $meal_name):"
+        echo "$response" | jq .
     fi
-  else
-    echo "Failed to get meal by name ($meal_name)."
-    exit 1
-  fi
+    else
+        echo "Failed to get meal by name ($meal_name)."
+        exit 1
+    fi
 }
 
-#this doesn't work at all yet
 update_meal_stats() {
     meal_id=$1
     result=$2
@@ -172,9 +171,9 @@ create_meal "Jello Salad" "American" 1.00 "MED"
 create_meal "Burrito" "Mexican" 10000.00 "MED"
 
 delete_meal 1
-get_leaderboard
-get_meal_by_id 2
 get_meal_by_name "Jello Salad"
+get_meal_by_id 2
+
 
 clear_meals
 
